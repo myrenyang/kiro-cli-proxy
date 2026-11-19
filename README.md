@@ -179,5 +179,5 @@ shellcheck *.sh
 
 ## Todo
 
-- Live view (SSE push) and filtering by status on the UI page (host filtering beyond "show tunnels" / "show telemetry")
-- Optional `UPSTREAM_PROXY` to chain through another proxy
+- Live view (SSE push) and filtering by host/status on the UI page (beyond the "show tunnels" / "show telemetry" toggles)
+- Optional `upstreamProxy` setting to chain through another proxy
