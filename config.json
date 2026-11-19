@@ -1,0 +1,22 @@
+{
+  "proxyPort": 8901,
+  "dbPath": "data.db",
+  "certDir": "certs",
+  "systemCaFile": "/etc/ssl/certs/ca-certificates.crt",
+  "tunnelHosts": [
+    "cognito-identity.*.amazonaws.com",
+    "cognito-identity-fips.*.amazonaws.com",
+    "oidc.*.amazonaws.com",
+    "sts.amazonaws.com",
+    "sts.*.amazonaws.com",
+    "*.*.auth.desktop.kiro.dev"
+  ],
+  "learnTunnels": true,
+  "learnedTunnelTtlHours": 24,
+  "logFullBodies": true,
+  "bodyCapKilobytes": 1000,
+  "retentionDays": 7,
+  "retentionCount": 100,
+  "logLevel": "info",
+  "logFieldMaxLength": 1000
+}

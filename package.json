@@ -1,0 +1,15 @@
+{
+  "name": "kiro-cli-proxy",
+  "version": "0.1.0",
+  "description": "Forward MITM proxy for kiro-cli that logs decrypted chat traffic to SQLite with a small web UI",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --use-system-ca src/server.js",
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}
