@@ -16,9 +16,11 @@ const html = `<!DOCTYPE html>
 <header>
   <h2>kiro-cli-proxy</h2>
   <label>load <select id="limit"><option>8</option><option>20</option><option>50</option><option selected>100</option></select> rows</label>
-  <label><input type="checkbox" id="tunnels" checked> show tunnels</label>
-  <label><input type="checkbox" id="telemetry"> show telemetry</label>
-  <label><input type="checkbox" id="aborted"> show aborted</label>
+  <span class="filters">filters:
+    <label><input type="checkbox" id="tunnels" checked> tunnels</label>
+    <label><input type="checkbox" id="telemetry"> telemetry</label>
+    <label><input type="checkbox" id="aborted"> aborted</label>
+  </span>
   <label><input type="checkbox" id="auto" checked> auto-refresh</label>
   <button id="refresh" type="button">Refresh</button>
   <span id="status" class="muted"></span>
@@ -45,6 +47,8 @@ html,body{height:100%}
 body{margin:0;box-sizing:border-box;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-family:monospace;font-size:.9rem;padding:1rem;background:#1e1e1e;color:#d4d4d4}
 header{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem;flex:0 0 auto}
 h2{color:#ccc;margin:0}
+.filters{display:inline-flex;align-items:center;gap:.6rem;border:1px solid #444;border-radius:4px;padding:.15rem .5rem;background:#252526;color:#9cdcfe}
+.filters label{color:#d4d4d4}
 .muted{color:#888}
 .table-wrap{flex:0 0 auto;box-sizing:border-box;height:calc(var(--row-h) * (var(--visible-rows) + 1) + 2px);overflow-y:auto;overflow-x:auto;border:1px solid #444;background:#1e1e1e}
 table{border-collapse:separate;border-spacing:0;width:100%}
