@@ -21,7 +21,7 @@ const html = `<!DOCTYPE html>
   <label><input type="checkbox" id="auto" checked> auto-refresh</label>
   <button id="refresh" type="button">Refresh</button>
   <span id="status" class="muted"></span>
-  <button id="toggle-table" type="button">hide</button>
+  <button id="toggle-table" type="button">Hide table</button>
   <span id="learned" class="flag-note" title="These hosts were decrypted at first, but a client rejected the proxy's certificate, so they are now relayed without decryption (see LEARN_TUNNELS in the README)."></span>
 </header>
 <div class="table-wrap" id="tablewrap">
@@ -190,7 +190,7 @@ const js = `(function () {
     var btn = $('toggle-table');
     var hidden = wrap.style.display !== 'none';
     wrap.style.display = hidden ? 'none' : '';
-    btn.textContent = hidden ? 'show' : 'hide';
+    btn.textContent = hidden ? 'Show table' : 'Hide table';
     if (!hidden) fitTableHeight();
   }
 
