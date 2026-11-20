@@ -9,8 +9,8 @@ Node 24, zero runtime dependencies: `node:sqlite` for storage and the `openssl` 
 ```
 kiro-cli ──CONNECT host:443──▶ kiro-cli-proxy ──TLS──▶ real server
                                    │
-         host in tunnelHosts?     ├─ no:  terminate TLS with a leaf cert signed by our CA,
-         (or an IP / not port 443) │       forward the request, log the decrypted transaction
+   host in tunnelHosts?            ├─ no:  terminate TLS with a leaf cert signed by our CA,
+   (or an IP / not port 443)       │       forward the request, log the decrypted transaction
                                    └─ yes: blind byte tunnel, log only host + byte counts
 ```
 
@@ -64,7 +64,7 @@ The proxy is always started with the proxy environment variables removed, so it 
 | `start-kiro-cli-proxy.sh [port=8901]` | If a proxy already answers on the port: reports it and exits 0 (no Node needed). Otherwise checks Node against `package.json` engines (fails, never switches versions), starts the proxy detached and waits for `/proxy/health`. Fails if the port is held by something else, or if a proxy is already running on a different port |
 | `stop-kiro-cli-proxy.sh [port=8901]` | SIGTERM, then SIGKILL after 10 s. Only signals a process whose command line contains this repo's `src/server.js` |
 
-The PID file is `run/kiro-cli-proxy.pid` and the log is `proxy.log`. To restart, run the stop script and then the start script. The proxy is started with all eight proxy environment variables removed, so it can never route through itself.
+The PID file is `run/kiro-cli-proxy.pid` and the log is `proxy.log`. To restart, run the stop script and then the start script. The proxy is started with the standard proxy environment variables (`HTTP(S)_PROXY`, `ALL_PROXY`, `NO_PROXY`, upper and lower case) removed, so it can never route through itself.
 
 ## Configuration
 
@@ -99,7 +99,7 @@ Retention runs at startup and then hourly.
 | Path | Description |
 |---|---|
 | `/proxy/health` | `{"status":"ok","name":"kiro-cli-proxy",...}`. Only answers once the CA and bundle exist |
-| `/proxy/data` | Web UI: transactions listed oldest first, newest last. "Show tunnels" is on by default; "show telemetry" and "show aborted" are off. The table area is a fixed 8 rows tall (header stays pinned) and scrolls vertically beyond that, following new rows while you are at the bottom; it loads the latest 100 rows by default (selectable). Request/response panels show the event-stream as assembled text plus events |
+| `/proxy/data` | Web UI (auto-refreshes every 5 s). Transactions are listed oldest first, newest last; chat rows are highlighted and low-signal rows (blind tunnels, telemetry, aborted) are greyed. A **filters** panel toggles tunnels (on by default), telemetry and aborted rows. Long host/operation values are truncated with the full value on hover. The table area is a fixed 8 rows tall (header stays pinned) and scrolls vertically beyond that, following new rows while you are at the bottom; it loads the latest 100 rows by default (selectable), and **Hide table** collapses it to give the detail panels the full height. Clicking anywhere in a decrypted row opens its request/response below, with the event stream shown as assembled text plus events |
 | `/proxy/api/rows?limit=8&tunnels=0&telemetry=0&aborted=0` | Row list as JSON, newest first. Shows decrypted, non-telemetry, non-aborted rows; `tunnels=1` adds blind tunnels (including learned ones), `telemetry=1` adds rows of category `telemetry`, `aborted=1` includes rows where the client closed before a response. The limit applies after filtering |
 | `/proxy/api/rows/:id` | One row with decoded request/response |
 
@@ -179,5 +179,5 @@ shellcheck *.sh
 
 ## Todo
 
-- Live view (SSE push) and filtering by host/status on the UI page (beyond the "show tunnels" / "show telemetry" toggles)
+- Live view (SSE push) and filtering by host/status on the UI page (beyond the tunnels / telemetry / aborted filters)
 - Optional `upstreamProxy` setting to chain through another proxy
