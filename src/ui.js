@@ -48,7 +48,7 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 th,td{box-sizing:border-box;height:var(--row-h);padding:0 8px;border-right:1px solid #444;border-bottom:1px solid #444;text-align:left;white-space:nowrap;overflow:hidden}
 thead th{position:sticky;top:0;z-index:1;background:#2d2d2d;color:#9cdcfe}
 tr{background:#1e1e1e}tr:hover{background:#252525}tr.active{background:#2a2a1a}
-tr.tunnel td{color:#777}
+tr.muted td{color:#777}
 .flag{margin-right:.5rem}
 .flag-note{color:#d7ba7d}
 .flag-reset{color:#8a8a8a;font-style:italic}
@@ -189,7 +189,10 @@ const js = `(function () {
     var scrollTop = wrap.scrollTop;
     tbody.textContent = '';
     rows.forEach(function (r) {
-      var tr = el('tr', r.kind === 'tunnel' ? 'tunnel' : '');
+      // Blind tunnels and telemetry rows are both greyed (muted); telemetry is low-signal
+      // even when it is decrypted.
+      var muted = r.kind === 'tunnel' || r.category === 'telemetry';
+      var tr = el('tr', muted ? 'muted' : '');
       tr.id = 'row-' + r.id;
       if (r.id === activeId) tr.classList.add('active');
       cell(tr, r.id);
