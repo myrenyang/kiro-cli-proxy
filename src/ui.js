@@ -18,6 +18,7 @@ const html = `<!DOCTYPE html>
   <label>load <select id="limit"><option>8</option><option>20</option><option>50</option><option selected>100</option></select> rows</label>
   <label><input type="checkbox" id="tunnels" checked> show tunnels</label>
   <label><input type="checkbox" id="telemetry"> show telemetry</label>
+  <label><input type="checkbox" id="aborted"> show aborted</label>
   <label><input type="checkbox" id="auto" checked> auto-refresh</label>
   <button id="refresh" type="button">Refresh</button>
   <span id="status" class="muted"></span>
@@ -214,9 +215,8 @@ const js = `(function () {
     var scrollTop = wrap.scrollTop;
     tbody.textContent = '';
     rows.forEach(function (r) {
-      // Blind tunnels and telemetry rows are both greyed (muted); telemetry is low-signal
-      // even when it is decrypted.
-      var muted = r.kind === 'tunnel' || r.category === 'telemetry';
+      // Blind tunnels, telemetry rows, and aborted rows are all greyed (muted): low-signal.
+      var muted = r.kind === 'tunnel' || r.category === 'telemetry' || r.aborted;
       var tr = el('tr', muted ? 'muted' : (r.category === 'chat' ? 'chat' : ''));
       tr.id = 'row-' + r.id;
       if (r.id === activeId) tr.classList.add('active');
@@ -258,7 +258,8 @@ const js = `(function () {
   function refresh() {
     var url = '/proxy/api/rows?limit=' + encodeURIComponent($('limit').value) +
       '&tunnels=' + ($('tunnels').checked ? '1' : '0') +
-      '&telemetry=' + ($('telemetry').checked ? '1' : '0');
+      '&telemetry=' + ($('telemetry').checked ? '1' : '0') +
+      '&aborted=' + ($('aborted').checked ? '1' : '0');
     return getJson(url).then(function (d) {
       renderRows(d.rows);
       $('status').textContent = 'updated ' + new Date().toLocaleTimeString() + ' (' + d.rows.length + ' rows)';
@@ -282,6 +283,7 @@ const js = `(function () {
   $('limit').addEventListener('change', refresh);
   $('tunnels').addEventListener('change', refresh);
   $('telemetry').addEventListener('change', refresh);
+  $('aborted').addEventListener('change', refresh);
   $('toggle-table').addEventListener('click', toggleTable);
   window.addEventListener('resize', fitTableHeight);
   setInterval(function () { if ($('auto').checked && !document.hidden) refresh(); }, REFRESH_INTERVAL_MS);

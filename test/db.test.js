@@ -132,12 +132,38 @@ test('a row written without a category (by an older proxy still running) is clas
 
 test('every filter combination is answered from an index, never a full table scan', () => {
   const db = openDb(':memory:');
-  for (const o of [{}, { tunnels: true }, { telemetry: true }, { tunnels: true, telemetry: true }]) {
+  for (const o of [{}, { tunnels: true }, { telemetry: true }, { tunnels: true, telemetry: true },
+    { aborted: true }, { tunnels: true, aborted: true }, { tunnels: true, telemetry: true, aborted: true }]) {
     const plan = db.raw.prepare(`EXPLAIN QUERY PLAN ${buildListSql(o)}`).all({ limit: 8 }).map(r => r.detail).join('\n');
     assert.ok(!/SCAN transactions/.test(plan), `full scan for ${JSON.stringify(o)}:\n${plan}`);
     assert.match(plan, /SEARCH transactions USING INDEX idx_transactions_kind_id/);
     assert.equal(/idx_transactions_category_id/.test(plan), !!o.telemetry, `category index is used exactly when telemetry is shown (${JSON.stringify(o)})`);
   }
+  db.close();
+});
+
+test('aborted rows are hidden unless asked for, across every category, and the limit applies after filtering', () => {
+  const db = openDb(':memory:');
+  const add = (kind, host, aborted) => db.insert({ kind, ts: NOW, host, aborted });
+  const chatOk = add('mitm', 'runtime.eu-central-1.kiro.dev', false);
+  const chatAborted = add('mitm', 'runtime.eu-central-1.kiro.dev', true);
+  const tunnelOk = add('tunnel', 'example.com', false);
+  const tunnelAborted = add('tunnel', 'example.com', true);
+  const ids = opts => db.list({ limit: 100, ...opts }).map(r => r.id);
+
+  // Default: no aborted rows at all, even with tunnels shown.
+  assert.deepEqual(ids({ tunnels: true }).sort(), [chatOk, tunnelOk].sort());
+  assert.ok(!ids({ tunnels: true }).includes(chatAborted));
+  // show aborted: brings them back within the active category/kind filters.
+  assert.deepEqual(ids({ tunnels: true, aborted: true }).sort(), [chatOk, chatAborted, tunnelOk, tunnelAborted].sort());
+  // aborted alone (tunnels off) still respects the tunnels filter.
+  assert.deepEqual(ids({ aborted: true }).sort(), [chatOk, chatAborted].sort());
+
+  // Newer aborted rows must not push a visible row out of a 1-row window when aborted is off.
+  for (let i = 0; i < 5; i++) add('mitm', 'runtime.eu-central-1.kiro.dev', true);
+  const win = db.list({ limit: 1 });
+  assert.equal(win.length, 1);
+  assert.equal(win[0].aborted, 0);
   db.close();
 });
 

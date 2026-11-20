@@ -24,10 +24,10 @@ function tmp() { return fs.mkdtempSync(path.join(os.tmpdir(), 'kcp-int-')); }
 // The proxy records a row when the response socket closes, which can be a few
 // milliseconds after the client has read the last byte. Wait for it instead of
 // assuming it is already there.
-async function waitForRow(proxy, { tunnels = false, timeoutMs = 10000 } = {}) {
+async function waitForRow(proxy, { tunnels = false, aborted = false, timeoutMs = 10000 } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const rows = proxy.db.list({ limit: 1, tunnels });
+    const rows = proxy.db.list({ limit: 1, tunnels, aborted });
     if (rows.length > 0) return proxy.db.get(rows[0].id);
     await new Promise(r => setTimeout(r, 20));
   }
@@ -310,7 +310,7 @@ test('a client that aborts mid-stream is recorded as aborted', async () => {
       req.end('{}');
       setTimeout(() => reject(new Error('no response data')), 5000).unref();
     });
-    const row = await waitForRow(proxy);
+    const row = await waitForRow(proxy, { aborted: true });
     assert.equal(row.aborted, 1);
     assert.equal(row.status, 200);
   } finally {
@@ -512,10 +512,10 @@ test('auto-fallback: after a client rejects the proxy certificate the host is tu
   const f = await learnFixture();
   try {
     await untrustingClient(f.port, LEARN_HOST);
-    await waitFor(() => f.proxy.db.list({ limit: 5 }).find(r => /rejected the proxy certificate/.test(r.error || '')));
+    await waitFor(() => f.proxy.db.list({ limit: 5, aborted: true }).find(r => /rejected the proxy certificate/.test(r.error || '')));
 
     // 1. The rejected attempt is recorded as its own visible, flagged row.
-    const rejected = f.proxy.db.list({ limit: 5 }).find(r => /rejected the proxy certificate/.test(r.error));
+    const rejected = f.proxy.db.list({ limit: 5, aborted: true }).find(r => /rejected the proxy certificate/.test(r.error));
     assert.equal(rejected.host, LEARN_HOST);
     assert.equal(rejected.kind, 'mitm');
     assert.equal(rejected.aborted, 1);
@@ -597,7 +597,7 @@ test('auto-fallback also catches clients that finish the handshake and then sile
     await silentlyRejectingClient(f.port, LEARN_HOST);
     const h = await waitFor(async () => { const x = await health(f.port); return x.learned_tunnels.length ? x : null; });
     assert.equal(h.learned_tunnels[0].host, LEARN_HOST);
-    const rejected = f.proxy.db.list({ limit: 5 }).find(r => /rejected the proxy certificate/.test(r.error || ''));
+    const rejected = f.proxy.db.list({ limit: 5, aborted: true }).find(r => /rejected the proxy certificate/.test(r.error || ''));
     assert.match(rejected.error, /closed right after the TLS handshake without sending a request/);
     assert.equal(await requestVia(f.port, LEARN_HOST, f.upstream.caPem), 'real-server-says-hi', 'the retry goes through as a blind tunnel');
   } finally { await f.cleanup(); }

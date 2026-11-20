@@ -81,12 +81,14 @@ function migrate(db) {
 //   blind tunnels that are not telemetry    -> idx_transactions_kind_id   (only if `tunnels`)
 //   telemetry rows of any kind              -> idx_transactions_category_id   (only if `telemetry`)
 // `IS NOT` rather than `<>` so rows whose category is still NULL are not silently dropped.
-function buildListSql({ tunnels = false, telemetry = false } = {}) {
+// Aborted rows (aborted = 1) are hidden unless `aborted` is set, independently of the above.
+function buildListSql({ tunnels = false, telemetry = false, aborted = false } = {}) {
   const cols = `id, ${LIST_COLUMNS.join(',')}`;
   const wheres = ["kind = 'mitm' AND category IS NOT 'telemetry'"];
   if (tunnels) wheres.push("kind = 'tunnel' AND category IS NOT 'telemetry'");
   if (telemetry) wheres.push("category = 'telemetry'");
-  const branch = w => `SELECT ${cols} FROM transactions WHERE ${w} ORDER BY id DESC LIMIT @limit`;
+  const abortedClause = aborted ? '' : ' AND aborted IS NOT 1';
+  const branch = w => `SELECT ${cols} FROM transactions WHERE (${w})${abortedClause} ORDER BY id DESC LIMIT @limit`;
   if (wheres.length === 1) return branch(wheres[0]);
   return `SELECT * FROM (${wheres.map(w => `SELECT * FROM (${branch(w)})`).join(' UNION ALL ')}) ORDER BY id DESC LIMIT @limit`;
 }
@@ -119,9 +121,9 @@ function openDb(dbPath) {
   }
 
   // See buildListSql for which rows are visible. `limit` applies to the visible rows.
-  function list({ limit = 8, tunnels = false, telemetry = false } = {}) {
+  function list({ limit = 8, tunnels = false, telemetry = false, aborted = false } = {}) {
     const n = Math.min(Math.max(Number.parseInt(limit, 10) || 8, 1), 500);
-    return db.prepare(buildListSql({ tunnels, telemetry })).all({ limit: n }).map(plain);
+    return db.prepare(buildListSql({ tunnels, telemetry, aborted })).all({ limit: n }).map(plain);
   }
 
   function get(id) {

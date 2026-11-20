@@ -99,8 +99,8 @@ Retention runs at startup and then hourly.
 | Path | Description |
 |---|---|
 | `/proxy/health` | `{"status":"ok","name":"kiro-cli-proxy",...}`. Only answers once the CA and bundle exist |
-| `/proxy/data` | Web UI: transactions listed oldest first, newest last. "Show tunnels" is on by default and "show telemetry" is off. The table area is a fixed 8 rows tall (header stays pinned) and scrolls vertically beyond that, following new rows while you are at the bottom; it loads the latest 100 rows by default (selectable). Request/response panels show the event-stream as assembled text plus events |
-| `/proxy/api/rows?limit=8&tunnels=0&telemetry=0` | Row list as JSON, newest first. Shows decrypted rows that are not telemetry; `tunnels=1` adds blind tunnels (including learned ones), `telemetry=1` adds rows of category `telemetry`. The limit applies after filtering |
+| `/proxy/data` | Web UI: transactions listed oldest first, newest last. "Show tunnels" is on by default; "show telemetry" and "show aborted" are off. The table area is a fixed 8 rows tall (header stays pinned) and scrolls vertically beyond that, following new rows while you are at the bottom; it loads the latest 100 rows by default (selectable). Request/response panels show the event-stream as assembled text plus events |
+| `/proxy/api/rows?limit=8&tunnels=0&telemetry=0&aborted=0` | Row list as JSON, newest first. Shows decrypted, non-telemetry, non-aborted rows; `tunnels=1` adds blind tunnels (including learned ones), `telemetry=1` adds rows of category `telemetry`, `aborted=1` includes rows where the client closed before a response. The limit applies after filtering |
 | `/proxy/api/rows/:id` | One row with decoded request/response |
 
 The UI is served with a strict CSP, builds all content with `textContent` (captured bodies are untrusted), makes no third-party requests, and requests with a non-loopback `Host` header are refused (DNS-rebinding guard).

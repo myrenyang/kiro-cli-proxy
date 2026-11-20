@@ -223,6 +223,7 @@ function createProxy(options = {}) {
         limit: url.searchParams.get('limit') || 8,
         tunnels: url.searchParams.get('tunnels') === '1',
         telemetry: url.searchParams.get('telemetry') === '1',
+        aborted: url.searchParams.get('aborted') === '1',
       }).map(r => ({ ...r, error_kind: errorKind(r) }));
       return sendJson(res, 200, { rows, learned: learnedHosts().map(l => l.host) });
     }

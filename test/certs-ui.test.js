@@ -142,6 +142,7 @@ test('UI table area is a fixed 8-row viewport that scrolls vertically and keeps 
   assert.match(ui.html, /<option selected>100<\/option>/, 'loads more than 8 rows so the scrollbar is meaningful');
   assert.match(ui.html, /<input type="checkbox" id="tunnels" checked> show tunnels/, 'tunnels filter is on by default');
   assert.match(ui.html, /<input type="checkbox" id="telemetry"> show telemetry/, 'telemetry filter exists and is off by default');
+  assert.match(ui.html, /<input type="checkbox" id="aborted"> show aborted/, 'aborted filter exists and is off by default');
   assert.match(ui.js, /var COLS = \['id', 'time', 'category', 'host'/, 'the table has a category column');
   assert.match(ui.js, /cell\(tr, r\.category\)/, 'and fills it from the row');
   assert.match(ui.js, /'&telemetry=' \+ \(\$\('telemetry'\)\.checked/, 'the filter is sent to the API');
