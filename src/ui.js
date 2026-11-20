@@ -39,11 +39,12 @@ const html = `<!DOCTYPE html>
 `;
 
 const css = `:root{color-scheme:dark;--row-h:32px;--visible-rows:8}
-body{font-family:monospace;font-size:.9rem;padding:1rem;background:#1e1e1e;color:#d4d4d4}
-header{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem}
+html,body{height:100%}
+body{margin:0;box-sizing:border-box;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-family:monospace;font-size:.9rem;padding:1rem;background:#1e1e1e;color:#d4d4d4}
+header{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem;flex:0 0 auto}
 h2{color:#ccc;margin:0}
 .muted{color:#888}
-.table-wrap{box-sizing:border-box;height:calc(var(--row-h) * (var(--visible-rows) + 1) + 2px);overflow-y:auto;overflow-x:auto;border:1px solid #444;background:#1e1e1e}
+.table-wrap{flex:0 0 auto;box-sizing:border-box;height:calc(var(--row-h) * (var(--visible-rows) + 1) + 2px);overflow-y:auto;overflow-x:auto;border:1px solid #444;background:#1e1e1e}
 table{border-collapse:separate;border-spacing:0;width:100%}
 th,td{box-sizing:border-box;height:var(--row-h);padding:0 8px;border-right:1px solid #444;border-bottom:1px solid #444;text-align:left;white-space:nowrap;overflow:hidden}
 thead th{position:sticky;top:0;z-index:1;background:#2d2d2d;color:#9cdcfe}
@@ -58,8 +59,8 @@ tr.muted td{color:#777}
 button,select{background:#3a3a3a;color:#d4d4d4;border:1px solid #555;padding:2px 8px;cursor:pointer;border-radius:3px;font-family:inherit}
 td button{padding:0 8px;line-height:1.5}
 button:hover{background:#4a4a4a}button:disabled{opacity:.4;cursor:default}
-.panels{display:flex;gap:1rem;margin-top:1rem}
-.panel{flex:1;border:1px solid #444;padding:.5rem;border-radius:4px;overflow:auto;max-height:65vh;background:#252526;min-width:0}
+.panels{display:flex;gap:1rem;margin-top:1rem;flex:1 1 auto;min-height:0}
+.panel{flex:1;border:1px solid #444;padding:.5rem;border-radius:4px;overflow:auto;background:#252526;min-width:0}
 .panel h3{margin:0 0 .25rem;font-size:1rem;color:#9cdcfe}
 h4{margin:.6rem 0 .25rem;font-size:.85rem;color:#9cdcfe}
 .placeholder{color:#666;font-style:italic}
