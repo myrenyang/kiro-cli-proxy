@@ -21,6 +21,7 @@ const html = `<!DOCTYPE html>
   <label><input type="checkbox" id="auto" checked> auto-refresh</label>
   <button id="refresh" type="button">Refresh</button>
   <span id="status" class="muted"></span>
+  <button id="toggle-table" type="button">hide</button>
   <span id="learned" class="flag-note" title="These hosts were decrypted at first, but a client rejected the proxy's certificate, so they are now relayed without decryption (see LEARN_TUNNELS in the README)."></span>
 </header>
 <div class="table-wrap" id="tablewrap">
@@ -177,9 +178,20 @@ const js = `(function () {
   // that area and would eat into the 8th row, so add its measured thickness.
   function fitTableHeight() {
     var wrap = $('tablewrap');
+    if (wrap.style.display === 'none') return; // hidden: offsetHeight is 0, nothing to size
     wrap.style.height = '';
     var bar = wrap.offsetHeight - wrap.clientHeight - 2; // 2 = top and bottom border
     if (bar > 0) wrap.style.height = 'calc(var(--row-h) * (var(--visible-rows) + 1) + 2px + ' + bar + 'px)';
+  }
+
+  // Hide/show the table so the detail panels can use the whole height.
+  function toggleTable() {
+    var wrap = $('tablewrap');
+    var btn = $('toggle-table');
+    var hidden = wrap.style.display !== 'none';
+    wrap.style.display = hidden ? 'none' : '';
+    btn.textContent = hidden ? 'show' : 'hide';
+    if (!hidden) fitTableHeight();
   }
 
   function renderRows(rows) {
@@ -261,6 +273,7 @@ const js = `(function () {
   $('limit').addEventListener('change', refresh);
   $('tunnels').addEventListener('change', refresh);
   $('telemetry').addEventListener('change', refresh);
+  $('toggle-table').addEventListener('click', toggleTable);
   window.addEventListener('resize', fitTableHeight);
   setInterval(function () { if ($('auto').checked && !document.hidden) refresh(); }, REFRESH_INTERVAL_MS);
   refresh();
