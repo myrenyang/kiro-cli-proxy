@@ -173,6 +173,15 @@ const js = `(function () {
   }
   function cell(tr, text) { tr.appendChild(el('td', null, text === null || text === undefined ? '' : String(text))); }
 
+  // Like cell(), but truncates long values to MAX_CELL_CHARS and shows the full value on hover.
+  var MAX_CELL_CHARS = 40;
+  function cellTrunc(tr, text) {
+    var full = text === null || text === undefined ? '' : String(text);
+    var td = el('td', null, full.length > MAX_CELL_CHARS ? full.slice(0, MAX_CELL_CHARS) + '...' : full);
+    if (full.length > MAX_CELL_CHARS) td.title = full;
+    tr.appendChild(td);
+  }
+
   // The table area is exactly header + 8 rows tall (see --visible-rows in the CSS).
   // When the table is wider than the window, a horizontal scrollbar appears inside
   // that area and would eat into the 8th row, so add its measured thickness.
@@ -214,8 +223,8 @@ const js = `(function () {
       cell(tr, r.id);
       cell(tr, fmtTime(r.ts));
       cell(tr, r.category);
-      cell(tr, r.host + (r.port && r.port !== 443 ? ':' + r.port : ''));
-      cell(tr, r.kind === 'tunnel' ? '(tunnel)' : r.operation || r.path);
+      cellTrunc(tr, r.host + (r.port && r.port !== 443 ? ':' + r.port : ''));
+      cellTrunc(tr, r.kind === 'tunnel' ? '(tunnel)' : r.operation || r.path);
       cell(tr, r.status);
       cell(tr, r.ttfb_ms);
       cell(tr, r.duration_ms);
