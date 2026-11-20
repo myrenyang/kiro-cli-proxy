@@ -74,6 +74,7 @@ details>summary{cursor:pointer;color:#d4d4d4}
 
 const js = `(function () {
   'use strict';
+  var REFRESH_INTERVAL_MS = 5000;
   var COLS = ['id', 'time', 'category', 'host', 'operation', 'status', 'ttfb_ms', 'duration_ms', 'req_bytes', 'res_bytes', 'conversation', 'model_id', 'history', 'tools', 'flags'];
   var $ = function (id) { return document.getElementById(id); };
   var activeId = null;
@@ -260,7 +261,7 @@ const js = `(function () {
   $('tunnels').addEventListener('change', refresh);
   $('telemetry').addEventListener('change', refresh);
   window.addEventListener('resize', fitTableHeight);
-  setInterval(function () { if ($('auto').checked && !document.hidden) refresh(); }, 3000);
+  setInterval(function () { if ($('auto').checked && !document.hidden) refresh(); }, REFRESH_INTERVAL_MS);
   refresh();
 })();
 `;
