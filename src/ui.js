@@ -48,6 +48,8 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 th,td{box-sizing:border-box;height:var(--row-h);padding:0 8px;border-right:1px solid #444;border-bottom:1px solid #444;text-align:left;white-space:nowrap;overflow:hidden}
 thead th{position:sticky;top:0;z-index:1;background:#2d2d2d;color:#9cdcfe}
 tr{background:#1e1e1e}tr:hover{background:#252525}tr.active{background:#2a2a1a}
+tr.clickable{cursor:pointer}
+tr.chat td{color:#d7ba7d}
 tr.muted td{color:#777}
 .flag{margin-right:.5rem}
 .flag-note{color:#d7ba7d}
@@ -72,7 +74,7 @@ details>summary{cursor:pointer;color:#d4d4d4}
 
 const js = `(function () {
   'use strict';
-  var COLS = ['id', 'time', 'category', 'host', 'operation', 'status', 'ttfb_ms', 'duration_ms', 'req_bytes', 'res_bytes', 'conversation', 'model_id', 'history', 'tools', 'flags', 'details'];
+  var COLS = ['id', 'time', 'category', 'host', 'operation', 'status', 'ttfb_ms', 'duration_ms', 'req_bytes', 'res_bytes', 'conversation', 'model_id', 'history', 'tools', 'flags'];
   var $ = function (id) { return document.getElementById(id); };
   var activeId = null;
   var firstRender = true;
@@ -192,7 +194,7 @@ const js = `(function () {
       // Blind tunnels and telemetry rows are both greyed (muted); telemetry is low-signal
       // even when it is decrypted.
       var muted = r.kind === 'tunnel' || r.category === 'telemetry';
-      var tr = el('tr', muted ? 'muted' : '');
+      var tr = el('tr', muted ? 'muted' : (r.category === 'chat' ? 'chat' : ''));
       tr.id = 'row-' + r.id;
       if (r.id === activeId) tr.classList.add('active');
       cell(tr, r.id);
@@ -210,14 +212,12 @@ const js = `(function () {
       cell(tr, r.history_count);
       cell(tr, r.tools_count);
       flagsCell(tr, r);
-      var td = el('td');
+      // Clicking anywhere in a decrypted row opens its details. Tunnel rows (including
+      // telemetry tunnels) have nothing decrypted to show, so they are not clickable.
       if (r.kind === 'mitm') {
-        var b = el('button', null, 'Show');
-        b.type = 'button';
-        b.addEventListener('click', function () { show(r.id); });
-        td.appendChild(b);
+        tr.classList.add('clickable');
+        tr.addEventListener('click', function () { show(r.id); });
       }
-      tr.appendChild(td);
       tbody.appendChild(tr);
     });
     fitTableHeight();
